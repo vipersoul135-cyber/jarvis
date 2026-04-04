@@ -5,74 +5,168 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jarvis AI Assistant</title>
 <style>
-    body { background:#111; color:#0ff; font-family:monospace; display:flex; justify-content:center; align-items:center; height:100vh; }
-    #jarvisAssistant { width:350px; background:rgba(0,0,0,0.9); padding:20px; border-radius:15px; box-shadow:0 0 20px #0ff; }
-    #jarvisAssistant h3 { text-align:center; margin:0 0 15px 0; }
-    #jarvisChat { height:250px; overflow-y:auto; border:1px solid #0ff; padding:10px; margin-bottom:10px; border-radius:8px; font-size:14px; }
-    #jarvisStatus { text-align:center; font-size:13px; margin-top:5px; }
-    b { color:#0ff; }
+    body { margin:0; font-family:monospace; background:#111; }
+
+    /* Floating Jarvis button */
+    #jarvisButton {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: radial-gradient(circle, #0ff 0%, #00aaff 100%);
+        border-radius: 50%;
+        box-shadow: 0 0 15px #0ff, 0 0 30px #00aaff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: transform 0.2s;
+        z-index: 1000;
+    }
+
+    #jarvisButton:hover {
+        transform: scale(1.2);
+        box-shadow: 0 0 20px #0ff, 0 0 40px #00aaff;
+    }
+
+    #jarvisButton::after {
+        content: "🎤";
+        font-size: 24px;
+        color:#111;
+    }
+
+    /* Chat box */
+    #jarvisChatBox {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        width: 300px;
+        max-height: 350px;
+        background: rgba(0,0,0,0.9);
+        border-radius: 15px;
+        box-shadow: 0 0 20px #0ff;
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 1000;
+    }
+
+    #jarvisChatBox header {
+        padding: 10px;
+        background: #00aaff;
+        color: #fff;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    #jarvisChat {
+        flex: 1;
+        padding: 10px;
+        overflow-y: auto;
+        color: #0ff;
+        font-size: 14px;
+    }
+
+    #jarvisStatus {
+        text-align: center;
+        font-size: 12px;
+        padding: 5px;
+        color: #0ff;
+        border-top: 1px solid #0ff;
+    }
 </style>
 </head>
 <body>
 
-<div id="jarvisAssistant">
-    <h3>Jarvis AI</h3>
+<!-- Floating button -->
+<div id="jarvisButton"></div>
+
+<!-- Chat box -->
+<div id="jarvisChatBox">
+    <header>Jarvis AI</header>
     <div id="jarvisChat"></div>
-    <p id="jarvisStatus">Say "Jarvis" to activate</p>
+    <div id="jarvisStatus">Say "Jarvis" to activate</div>
 </div>
 
 <script>
+const jarvisButton = document.getElementById("jarvisButton");
+const chatBoxContainer = document.getElementById("jarvisChatBox");
 const chatBox = document.getElementById("jarvisChat");
 const status = document.getElementById("jarvisStatus");
 
-// Browser support check
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if(!SpeechRecognition){
     status.innerText = "Your browser does not support Speech Recognition!";
 }
 
-// Looping Wake-Word Recognition
-let recognition;
+// Toggle chat box
+jarvisButton.addEventListener("click", () => {
+    chatBoxContainer.style.display = chatBoxContainer.style.display === "flex" ? "none" : "flex";
+    chatBoxContainer.style.flexDirection = "column";
+});
+
+// AI logic
+let wakeRecognition;
+let commandRecognition;
+let listening = false;
 
 function startWakeWordListener() {
-    recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.start();
+    if(listening) return;
+    listening = true;
+    
+    wakeRecognition = new SpeechRecognition();
+    wakeRecognition.lang = "en-US";
+    wakeRecognition.continuous = true;
+    wakeRecognition.interimResults = true;
+    wakeRecognition.start();
     status.innerText = 'Listening for "Jarvis"...';
 
-    recognition.onresult = (event) => {
+    wakeRecognition.onresult = (event) => {
         const transcript = Array.from(event.results)
             .map(r => r[0].transcript)
             .join("")
             .toLowerCase();
+        console.log("Wake-word transcript:", transcript);
 
         if(transcript.includes("jarvis")){
-            addMessage("System", "Wake word detected!");
-            recognition.stop();
+            addMessage("System", "Wake word detected! Listening...");
+            wakeRecognition.stop();
             activateJarvis();
+            chatBoxContainer.style.display = "flex";
         }
     };
 
-    recognition.onerror = () => setTimeout(startWakeWordListener, 1000);
-    recognition.onend = () => setTimeout(startWakeWordListener, 1000);
+    wakeRecognition.onerror = () => {
+        wakeRecognition.stop();
+        setTimeout(startWakeWordListener, 1000);
+    };
+
+    wakeRecognition.onend = () => {
+        if(listening) setTimeout(startWakeWordListener, 500);
+    };
 }
 
-// Start Jarvis conversation
 function activateJarvis() {
-    status.innerText = "Jarvis Activated! Speak your command...";
-    const commandRecog = new SpeechRecognition();
-    commandRecog.lang = "en-US";
-    commandRecog.interimResults = false;
-    commandRecog.maxAlternatives = 1;
-    commandRecog.start();
+    commandRecognition = new SpeechRecognition();
+    commandRecognition.lang = "en-US";
+    commandRecognition.interimResults = false;
+    commandRecognition.maxAlternatives = 1;
 
-    commandRecog.onresult = async (event) => {
-        const userText = event.results[0][0].transcript;
+    status.innerText = "Jarvis Activated! Speak your command...";
+    commandRecognition.start();
+
+    commandRecognition.onresult = async (event) => {
+        const userText = event.results[0][0].transcript.toLowerCase();
         addMessage("You", userText);
 
-        // AI response
+        if(userText.includes("stop")){
+            addMessage("System", "Jarvis stopped.");
+            status.innerText = 'Say "Jarvis" to activate again';
+            listening = false;
+            return;
+        }
+
         const aiResponse = await getJarvisResponse(userText);
         addMessage("Jarvis", aiResponse);
         speak(aiResponse);
@@ -81,13 +175,16 @@ function activateJarvis() {
         startWakeWordListener();
     };
 
-    commandRecog.onerror = () => {
+    commandRecognition.onerror = () => {
         status.innerText = 'Error occurred. Listening again...';
         startWakeWordListener();
     };
+
+    commandRecognition.onend = () => {
+        if(listening) startWakeWordListener();
+    };
 }
 
-// Add messages to chat box
 function addMessage(sender, text){
     const div = document.createElement("div");
     div.style.marginBottom = "8px";
@@ -96,25 +193,17 @@ function addMessage(sender, text){
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Text-to-Speech
 function speak(text){
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
-    utterance.rate = 1;
-    utterance.pitch = 1;
     speechSynthesis.speak(utterance);
 }
 
-// Replace this with OpenAI GPT API call for real AI
 async function getJarvisResponse(text){
-    // Example: fetch from your backend which calls OpenAI API
-    // return fetch('/api/jarvis?query='+encodeURIComponent(text)).then(res=>res.text());
-    
-    // Placeholder AI response
     return `You said: "${text}". Jarvis is responding!`;
 }
 
-// Start listening immediately
+// Start wake-word listener
 startWakeWordListener();
 </script>
 
