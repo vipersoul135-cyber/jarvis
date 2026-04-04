@@ -5,367 +5,157 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jarvis AI Assistant</title>
 <style>
-    body { margin:0; font-family:monospace; background:#111; color:#0ff; }
-    #jarvisButton {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 60px;
-        height: 60px;
-        background: radial-gradient(circle, #0ff 0%, #00aaff 100%);
-        border-radius: 50%;
-        box-shadow: 0 0 15px #0ff, 0 0 30px #00aaff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        z-index: 1000;
-        font-size: 24px;
-        color: #111;
-    }
-    #jarvisButton:hover { transform: scale(1.2); }
-    #jarvisChatBox {
-        position: fixed;
-        bottom: 90px;
-        right: 20px;
-        width: 300px;
-        max-height: 350px;
-        background: rgba(0,0,0,0.95);
-        border-radius: 15px;
-        box-shadow: 0 0 20px #0ff;
-        display: none;
-        flex-direction: column;
-        overflow: hidden;
-        z-index: 1000;
-    }
-    #jarvisChatBox header { padding: 10px; background: #00aaff; color:#fff; text-align:center; font-weight:bold; }
-    #jarvisChat { flex:1; padding:10px; overflow-y:auto; font-size:14px; }
-    #jarvisStatus { text-align:center; font-size:12px; padding:5px; color:#0ff; border-top:1px solid #0ff; }
-    b { color:#0ff; }
+  body { margin:0; font-family: monospace; background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; color:#0ff; }
+  
+  /* Center circle AI assistant */
+  #jarvisCircle {
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, #0ff 0%, #00aaff 80%);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 30px #0ff, 0 0 60px #00aaff;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  #jarvisCircle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 40px #0ff, 0 0 80px #00aaff;
+  }
+
+  #jarvisCircle img {
+    width: 80px;
+    height: 80px;
+  }
+
+  #jarvisStatus {
+    position: absolute;
+    bottom: 50px;
+    color:#0ff;
+    font-size: 16px;
+  }
+
+  #jarvisChat {
+    position: absolute;
+    bottom: 100px;
+    width: 300px;
+    max-height: 300px;
+    background: rgba(0,0,0,0.9);
+    border-radius: 15px;
+    padding: 10px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  #jarvisChat b { color:#0ff; }
 </style>
 </head>
 <body>
 
-<div id="jarvisButton">🎤</div>
-
-<div id="jarvisChatBox">
-    <header>Jarvis AI</header>
-    <div id="jarvisChat"></div>
-    <div id="jarvisStatus">Click mic to start listening</div>
+<div id="jarvisCircle">
+  <img src="https://cdn-icons-png.flaticon.com/512/4712/4712031.png" alt="Jarvis Robot">
 </div>
 
+<div id="jarvisStatus">Say "Jarvis" to activate</div>
+<div id="jarvisChat"></div>
+
 <script>
-const jarvisButton = document.getElementById("jarvisButton");
-const chatBoxContainer = document.getElementById("jarvisChatBox");
-const chatBox = document.getElementById("jarvisChat");
+const circle = document.getElementById("jarvisCircle");
 const status = document.getElementById("jarvisStatus");
+const chatBox = document.getElementById("jarvisChat");
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
 if(!SpeechRecognition){
-    status.innerText = "Your browser does not support Speech Recognition!";
+  status.innerText = "Your browser does not support Speech Recognition!";
 }
 
 let recognition;
 let listening = false;
 let commandMode = false;
 
-// Start recognition
-function startRecognition() {
-    if(listening) return;
+// Start speech recognition
+function startRecognition(){
+  recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.start();
+  listening = true;
+  chatBox.style.display = "block";
+  status.innerText = 'Listening for "Jarvis"...';
 
-    recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.start();
-    listening = true;
-    status.innerText = 'Listening for "Jarvis"...';
+  recognition.onresult = async (event) => {
+    const transcript = Array.from(event.results)
+      .map(r => r[0].transcript)
+      .join("")
+      .toLowerCase();
 
-    recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-            .map(r => r[0].transcript)
-            .join("")
-            .toLowerCase();
+    console.log("Transcript:", transcript);
 
-        console.log("Transcript:", transcript);
-
-        if(!commandMode && transcript.includes("jarvis")){
-            addMessage("System", "Wake word detected! Listening...");
-            commandMode = true;
-            status.innerText = "Jarvis Activated! Speak your command...";
-            speak("Yes, I am listening!");
-        } else if(commandMode){
-            // Listen for stop command
-            if(transcript.includes("stop")){
-                addMessage("System", "Jarvis stopped.");
-                status.innerText = 'Click mic to start listening';
-                commandMode = false;
-                recognition.stop();
-            } else {
-                // Respond to user
-                addMessage("You", transcript);
-                getJarvisResponse(transcript).then(res=>{
-                    addMessage("Jarvis", res);
-                    speak(res);
-                });
-            }
-        }
-    };
-
-    recognition.onerror = (e) => {
-        console.log("Error:", e.error);
+    if(!commandMode && transcript.includes("jarvis")){
+      addMessage("System", "Wake word detected! Listening...");
+      commandMode = true;
+      status.innerText = "Jarvis Activated! Speak your command...";
+      speak("Yes, I am listening!");
+    } else if(commandMode){
+      if(transcript.includes("stop")){
+        addMessage("System", "Jarvis stopped.");
+        status.innerText = 'Say "Jarvis" to activate again';
+        commandMode = false;
         recognition.stop();
-        listening = false;
-        status.innerText = 'Click mic to start listening';
-    };
+      } else {
+        addMessage("You", transcript);
+        const response = await getJarvisResponse(transcript);
+        addMessage("Jarvis", response);
+        speak(response);
+      }
+    }
+  };
 
-    recognition.onend = () => {
-        listening = false;
-        if(commandMode){
-            // Restart recognition for continuous listening in command mode
-            startRecognition();
-        }
-    };
+  recognition.onerror = (e) => {
+    console.log("Error:", e.error);
+    recognition.stop();
+    listening = false;
+    status.innerText = 'Say "Jarvis" to activate again';
+  };
+
+  recognition.onend = () => {
+    listening = false;
+    if(commandMode){
+      startRecognition(); // restart to continue listening
+    }
+  };
 }
 
-// Add chat message
+// Chat box display
 function addMessage(sender, text){
-    const div = document.createElement("div");
-    div.style.marginBottom = "8px";
-    div.innerHTML = `<b>${sender}:</b> ${text}`;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-    chatBoxContainer.style.display = "flex";
+  const div = document.createElement("div");
+  div.style.marginBottom = "8px";
+  div.innerHTML = `<b>${sender}:</b> ${text}`;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 // Text-to-speech
 function speak(text){
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    speechSynthesis.speak(utterance);
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  speechSynthesis.speak(utterance);
 }
 
 // Dummy AI response
 async function getJarvisResponse(text){
-    return `You said: "${text}". Jarvis is responding!`;
+  return `You said: "${text}". Jarvis is responding!`;
 }
 
-// Toggle chat box and start listening on click
-jarvisButton.addEventListener("click", () => {
-    chatBoxContainer.style.display = "flex";
-    startRecognition();
+// Click circle once to grant mic permission and start listening
+circle.addEventListener("click", () => {
+  if(!listening) startRecognition();
+  status.innerText = 'Listening... Say "Jarvis" to activate';
 });
-</script>
-
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jarvis AI Assistant</title>
-<style>
-    body { margin:0; font-family:monospace; background:#111; }
-
-    /* Floating Jarvis button */
-    #jarvisButton {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 60px;
-        height: 60px;
-        background: radial-gradient(circle, #0ff 0%, #00aaff 100%);
-        border-radius: 50%;
-        box-shadow: 0 0 15px #0ff, 0 0 30px #00aaff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        transition: transform 0.2s;
-        z-index: 1000;
-    }
-
-    #jarvisButton:hover {
-        transform: scale(1.2);
-        box-shadow: 0 0 20px #0ff, 0 0 40px #00aaff;
-    }
-
-    #jarvisButton::after {
-        content: "🎤";
-        font-size: 24px;
-        color:#111;
-    }
-
-    /* Chat box */
-    #jarvisChatBox {
-        position: fixed;
-        bottom: 90px;
-        right: 20px;
-        width: 300px;
-        max-height: 350px;
-        background: rgba(0,0,0,0.9);
-        border-radius: 15px;
-        box-shadow: 0 0 20px #0ff;
-        display: none;
-        flex-direction: column;
-        overflow: hidden;
-        z-index: 1000;
-    }
-
-    #jarvisChatBox header {
-        padding: 10px;
-        background: #00aaff;
-        color: #fff;
-        font-weight: bold;
-        text-align: center;
-    }
-
-    #jarvisChat {
-        flex: 1;
-        padding: 10px;
-        overflow-y: auto;
-        color: #0ff;
-        font-size: 14px;
-    }
-
-    #jarvisStatus {
-        text-align: center;
-        font-size: 12px;
-        padding: 5px;
-        color: #0ff;
-        border-top: 1px solid #0ff;
-    }
-</style>
-</head>
-<body>
-
-<!-- Floating button -->
-<div id="jarvisButton"></div>
-
-<!-- Chat box -->
-<div id="jarvisChatBox">
-    <header>Jarvis AI</header>
-    <div id="jarvisChat"></div>
-    <div id="jarvisStatus">Say "Jarvis" to activate</div>
-</div>
-
-<script>
-const jarvisButton = document.getElementById("jarvisButton");
-const chatBoxContainer = document.getElementById("jarvisChatBox");
-const chatBox = document.getElementById("jarvisChat");
-const status = document.getElementById("jarvisStatus");
-
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-if(!SpeechRecognition){
-    status.innerText = "Your browser does not support Speech Recognition!";
-}
-
-// Toggle chat box
-jarvisButton.addEventListener("click", () => {
-    chatBoxContainer.style.display = chatBoxContainer.style.display === "flex" ? "none" : "flex";
-    chatBoxContainer.style.flexDirection = "column";
-});
-
-// AI logic
-let wakeRecognition;
-let commandRecognition;
-let listening = false;
-
-function startWakeWordListener() {
-    if(listening) return;
-    listening = true;
-    
-    wakeRecognition = new SpeechRecognition();
-    wakeRecognition.lang = "en-US";
-    wakeRecognition.continuous = true;
-    wakeRecognition.interimResults = true;
-    wakeRecognition.start();
-    status.innerText = 'Listening for "Jarvis"...';
-
-    wakeRecognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-            .map(r => r[0].transcript)
-            .join("")
-            .toLowerCase();
-        console.log("Wake-word transcript:", transcript);
-
-        if(transcript.includes("jarvis")){
-            addMessage("System", "Wake word detected! Listening...");
-            wakeRecognition.stop();
-            activateJarvis();
-            chatBoxContainer.style.display = "flex";
-        }
-    };
-
-    wakeRecognition.onerror = () => {
-        wakeRecognition.stop();
-        setTimeout(startWakeWordListener, 1000);
-    };
-
-    wakeRecognition.onend = () => {
-        if(listening) setTimeout(startWakeWordListener, 500);
-    };
-}
-
-function activateJarvis() {
-    commandRecognition = new SpeechRecognition();
-    commandRecognition.lang = "en-US";
-    commandRecognition.interimResults = false;
-    commandRecognition.maxAlternatives = 1;
-
-    status.innerText = "Jarvis Activated! Speak your command...";
-    commandRecognition.start();
-
-    commandRecognition.onresult = async (event) => {
-        const userText = event.results[0][0].transcript.toLowerCase();
-        addMessage("You", userText);
-
-        if(userText.includes("stop")){
-            addMessage("System", "Jarvis stopped.");
-            status.innerText = 'Say "Jarvis" to activate again';
-            listening = false;
-            return;
-        }
-
-        const aiResponse = await getJarvisResponse(userText);
-        addMessage("Jarvis", aiResponse);
-        speak(aiResponse);
-
-        status.innerText = 'Say "Jarvis" to activate again';
-        startWakeWordListener();
-    };
-
-    commandRecognition.onerror = () => {
-        status.innerText = 'Error occurred. Listening again...';
-        startWakeWordListener();
-    };
-
-    commandRecognition.onend = () => {
-        if(listening) startWakeWordListener();
-    };
-}
-
-function addMessage(sender, text){
-    const div = document.createElement("div");
-    div.style.marginBottom = "8px";
-    div.innerHTML = `<b>${sender}:</b> ${text}`;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function speak(text){
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "en-US";
-    speechSynthesis.speak(utterance);
-}
-
-async function getJarvisResponse(text){
-    return `You said: "${text}". Jarvis is responding!`;
-}
-
-// Start wake-word listener
-startWakeWordListener();
 </script>
 
 </body>
