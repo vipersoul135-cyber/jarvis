@@ -5,6 +5,124 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jarvis AI Assistant</title>
 <style>
+body { margin:0; font-family: monospace; background:#111; display:flex; justify-content:center; align-items:center; height:100vh; color:#0ff;}
+#jarvisCircle { width:180px; height:180px; border-radius:50%; background: radial-gradient(circle, #0ff 0%, #00aaff 80%); display:flex; justify-content:center; align-items:center; box-shadow:0 0 30px #0ff, 0 0 60px #00aaff; transition:transform 0.3s, box-shadow 0.3s;}
+#jarvisCircle:hover { transform: scale(1.1); box-shadow:0 0 40px #0ff,0 0 80px #00aaff;}
+#jarvisCircle img { width:100px; height:100px;}
+#jarvisStatus { position:absolute; bottom:50px; color:#0ff; font-size:16px; text-align:center; width:100%;}
+#jarvisChat { position:absolute; bottom:120px; width:320px; max-height:300px; background: rgba(0,0,0,0.95); border-radius:15px; padding:10px; overflow-y:auto; display:none; margin:auto; left:0; right:0;}
+#jarvisChat b { color:#0ff;}
+</style>
+</head>
+<body>
+
+<div id="jarvisCircle"><img src="https://cdn-icons-png.flaticon.com/512/4712/4712031.png" alt="Jarvis Robot"></div>
+<div id="jarvisStatus">Click anywhere to activate Jarvis</div>
+<div id="jarvisChat"></div>
+
+<script>
+const circle = document.getElementById("jarvisCircle");
+const status = document.getElementById("jarvisStatus");
+const chatBox = document.getElementById("jarvisChat");
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+let recognition;
+let listening = false;
+let commandMode = false;
+
+function startRecognition(){
+  recognition = new SpeechRecognition();
+  recognition.lang = "en-US";
+  recognition.continuous = true;
+  recognition.interimResults = false;
+  recognition.start();
+  listening = true;
+  chatBox.style.display = "block";
+  status.innerText = 'Listening for "Jarvis"...';
+
+  recognition.onresult = async (event)=>{
+    const transcript = Array.from(event.results).map(r=>r[0].transcript).join("").toLowerCase();
+    console.log("Transcript:", transcript);
+
+    if(!commandMode && transcript.includes("jarvis")){
+      addMessage("System","Wake word detected! Listening...");
+      commandMode = true;
+      status.innerText = "Jarvis Activated! Speak command...";
+      speak("Yes, I am listening!");
+    } else if(commandMode){
+      if(transcript.includes("stop")){
+        addMessage("System","Jarvis stopped.");
+        status.innerText='Click anywhere to activate again';
+        commandMode=false;
+        recognition.stop();
+      } else {
+        addMessage("You", transcript);
+        const response = await getJarvisResponse(transcript);
+        addMessage("Jarvis", response);
+        speak(response);
+        handleCommand(transcript);
+      }
+    }
+  };
+
+  recognition.onerror = e=>{
+    console.log("Error:", e.error);
+    recognition.stop();
+    listening=false;
+    status.innerText='Click anywhere to activate again';
+  };
+
+  recognition.onend = ()=>{
+    listening=false;
+    if(commandMode) startRecognition();
+  };
+}
+
+// Add chat message
+function addMessage(sender,text){
+  const div=document.createElement("div");
+  div.style.marginBottom="8px";
+  div.innerHTML=`<b>${sender}:</b> ${text}`;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// Text to speech
+function speak(text){
+  const utterance=new SpeechSynthesisUtterance(text);
+  utterance.lang="en-US";
+  speechSynthesis.speak(utterance);
+}
+
+// Dummy AI response
+async function getJarvisResponse(text){
+  if(text.includes("time")) return "The current time is "+ new Date().toLocaleTimeString();
+  if(text.includes("date")) return "Today's date is "+ new Date().toLocaleDateString();
+  return `You said: "${text}". Jarvis is ready!`;
+}
+
+// Handle safe commands
+function handleCommand(text){
+  if(text.includes("open google")) window.open("https://www.google.com","_blank");
+  if(text.includes("open youtube")) window.open("https://www.youtube.com","_blank");
+  if(text.includes("open play store")) window.open("https://play.google.com/store","_blank");
+  if(text.includes("tell me a joke")) addMessage("Jarvis","Why did the web developer go broke? Because he used up all his cache!");
+}
+
+// Activate mic on first click anywhere
+document.body.addEventListener("click",()=>{
+  if(!listening) startRecognition();
+  status.innerText='Listening... Say "Jarvis" to activate';
+});
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jarvis AI Assistant</title>
+<style>
 body {
   margin:0; font-family: monospace; background:#111; display:flex; justify-content:center; align-items:center; height:100vh; color:#0ff;
 }
