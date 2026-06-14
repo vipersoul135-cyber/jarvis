@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.A.R.V.I.S. — Core Intelligence System</title>
+    <meta name="description" content="Just A Rather Very Intelligent System — Jarvis AI Assistant">
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Animated background layers -->
+    <div class="bg-layer scanlines"></div>
+    <div class="bg-layer grid-overlay"></div>
+    <div class="bg-layer vignette"></div>
+
+    <!-- Corner brackets for HUD feel -->
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <div class="hud-container">
+
+        <!-- ── TOP HEADER ───────────────────────────────────── -->
+        <header class="hud-header">
+            <div class="header-left">
+                <div class="logo">J.A.R.V.I.S.</div>
+                <div class="logo-sub">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+            </div>
+            <div class="header-center">
+                <div class="header-ticker" id="header-ticker">CORE SYSTEMS NOMINAL &nbsp;·&nbsp; ALL MODULES ACTIVE &nbsp;·&nbsp; STARK INDUSTRIES &nbsp;·&nbsp;</div>
+            </div>
+            <div class="header-right">
+                <div class="status-pill online">
+                    <span class="status-dot"></span>ONLINE
+                </div>
+                <div class="clock" id="clock">00:00:00</div>
+            </div>
+        </header>
+
+        <!-- ── MAIN BODY ─────────────────────────────────────── -->
+        <div class="hud-body">
+
+            <!-- LEFT PANEL — System Stats -->
+            <aside class="panel left-panel">
+
+                <div class="panel-label">◈ SYSTEM DIAGNOSTICS</div>
+
+                <!-- CPU -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-icon">⬡</span>
+                        <span class="stat-title">CPU USAGE</span>
+                        <span id="cpu-text" class="stat-val">0%</span>
+                    </div>
+                    <div class="arc-bar">
+                        <div id="cpu-bar" class="arc-fill" style="width:0%"></div>
+                    </div>
+                    <div class="stat-bars">
+                        <div class="mini-bar" id="cpu-mini-0"></div>
+                        <div class="mini-bar" id="cpu-mini-1"></div>
+                        <div class="mini-bar" id="cpu-mini-2"></div>
+                        <div class="mini-bar" id="cpu-mini-3"></div>
+                        <div class="mini-bar" id="cpu-mini-4"></div>
+                        <div class="mini-bar" id="cpu-mini-5"></div>
+                        <div class="mini-bar" id="cpu-mini-6"></div>
+                        <div class="mini-bar" id="cpu-mini-7"></div>
+                    </div>
+                </div>
+
+                <!-- RAM -->
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-icon">⬡</span>
+                        <span class="stat-title">RAM USAGE</span>
+                        <span id="ram-text" class="stat-val">0%</span>
+                    </div>
+                    <div class="arc-bar">
+                        <div id="ram-bar" class="arc-fill ram" style="width:0%"></div>
+                    </div>
+                    <div class="stat-bars" id="ram-bars-row">
+                        <div class="mini-bar b"></div>
+                        <div class="mini-bar b"></div>
+                        <div class="mini-bar b"></div>
+                        <div class="mini-bar b"></div>
+                        <div class="mini-bar b"></div>
+                        <div class="mini-bar b"></div>
+                        <div class="mini-bar b"></div>
+                        <div class="mini-bar b"></div>
+                    </div>
+                </div>
+
+                <!-- Network indicator -->
+                <div class="stat-card compact">
+                    <div class="stat-header">
+                        <span class="stat-icon">◈</span>
+                        <span class="stat-title">NETWORK</span>
+                        <span class="stat-val online-val">SECURE</span>
+                    </div>
+                    <div class="network-dots">
+                        <span class="ndot active"></span>
+                        <span class="ndot active"></span>
+                        <span class="ndot active"></span>
+                        <span class="ndot active"></span>
+                        <span class="ndot"></span>
+                    </div>
+                </div>
+
+                <!-- Voice mode indicator -->
+                <div class="stat-card compact">
+                    <div class="stat-header">
+                        <span class="stat-icon">◈</span>
+                        <span class="stat-title">VOICE MODULE</span>
+                        <span class="stat-val online-val">ACTIVE</span>
+                    </div>
+                    <div class="waveform" id="waveform">
+                        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                        <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- CENTER — Arc Reactor + Status -->
+            <main class="center-stage">
+
+                <div class="reactor-wrap">
+                    <!-- Hex grid background -->
+                    <div class="hex-bg"></div>
+
+                    <!-- Orbit rings -->
+                    <div class="orbit orbit-1"></div>
+                    <div class="orbit orbit-2"></div>
+                    <div class="orbit orbit-3"></div>
+                    <div class="orbit orbit-4"></div>
+
+                    <!-- Rotating dashes -->
+                    <div class="arc-reactor">
+                        <div class="ring outer-ring"></div>
+                        <div class="ring middle-ring"></div>
+                        <div class="ring inner-ring"></div>
+                        <div class="core-glow">
+                            <div class="core-inner"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tick marks around reactor -->
+                    <svg class="tick-svg" viewBox="0 0 360 360">
+                        <circle cx="180" cy="180" r="170" fill="none" stroke="rgba(0,242,254,0.15)" stroke-width="1" stroke-dasharray="4 12"/>
+                    </svg>
+                </div>
+
+                <div class="status-block">
+                    <div class="status-text" id="voice-status">AWAITING COMMAND</div>
+                    <div class="status-subtext" id="status-sub">SAY "HEY JARVIS" TO ACTIVATE</div>
+                </div>
+
+            </main>
+
+            <!-- RIGHT PANEL — Chat -->
+            <aside class="panel right-panel">
+
+                <div class="panel-label">◈ COMMUNICATIONS LOG</div>
+
+                <div class="chat-container">
+                    <div id="chat-box" class="chat-box"></div>
+
+                    <div class="input-area">
+                        <div class="input-wrap">
+                            <input type="text" id="cmd-input" placeholder="TYPE A COMMAND..." autocomplete="off" spellcheck="false">
+                            <div class="input-line"></div>
+                        </div>
+                        <button id="mic-btn" title="Voice Input">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="9" y="2" width="6" height="12" rx="3" fill="currentColor"/>
+                                <path d="M5 10a7 7 0 0014 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <line x1="9" y1="21" x2="15" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </button>
+                        <button id="send-btn">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+            </aside>
+        </div>
+
+        <!-- ── BOTTOM STATUS BAR ──────────────────────────── -->
+        <footer class="hud-footer">
+            <span class="footer-item">STARK INDUSTRIES © 2025</span>
+            <span class="footer-sep">|</span>
+            <span class="footer-item">MARK VII INTERFACE</span>
+            <span class="footer-sep">|</span>
+            <span class="footer-item" id="footer-status">ALL SYSTEMS NOMINAL</span>
+            <span class="footer-sep">|</span>
+            <span class="footer-item">ENCRYPTION: AES-256</span>
+        </footer>
+
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

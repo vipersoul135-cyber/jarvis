@@ -1,0 +1,11 @@
+PyQt6==6.7.0
+vosk==0.3.45
+sounddevice==0.4.6
+pyttsx3==2.90
+psutil==5.9.8
+PyAutoGUI==0.9.54
+AppOpener==1.7
+requests==2.32.2
+keyboard==0.13.5
+pyaudio==0.2.14
+numpy==1.26.4

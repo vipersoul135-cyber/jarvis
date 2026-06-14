@@ -1,0 +1,348 @@
+:root {
+    --primary-color: #00f2fe;
+    --secondary-color: #4facfe;
+    --bg-color: #050810;
+    --panel-bg: rgba(5, 12, 25, 0.6);
+    --border-glow: 0 0 10px rgba(0, 242, 254, 0.5);
+    --text-color: #e0ffff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Rajdhani', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: radial-gradient(circle at 50% 50%, #0a1128 0%, #000000 100%);
+}
+
+/* Background grid */
+#particles-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-size: 40px 40px;
+    background-image: linear-gradient(rgba(0, 242, 254, 0.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0, 242, 254, 0.05) 1px, transparent 1px);
+    z-index: 0;
+}
+
+.hud-container {
+    position: relative;
+    z-index: 1;
+    width: 95vw;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.hud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    border-bottom: 2px solid var(--primary-color);
+    box-shadow: 0 5px 15px rgba(0, 242, 254, 0.2);
+}
+
+.logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--primary-color);
+    text-shadow: 0 0 15px var(--primary-color);
+    letter-spacing: 5px;
+}
+
+.system-status {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+    letter-spacing: 2px;
+}
+
+.hud-body {
+    display: flex;
+    justify-content: space-between;
+    flex: 1;
+    padding: 30px;
+    gap: 30px;
+    overflow: hidden;   /* prevent body from growing beyond viewport */
+    min-height: 0;      /* critical: allow flex children to shrink */
+}
+
+/* Sidebars */
+.sidebar {
+    width: 300px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow: hidden;   /* never let sidebar push layout */
+    min-height: 0;
+}
+
+/* Right sidebar fills all available height, never grows past it */
+.right-sidebar {
+    height: 100%;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.stat-box {
+    background: var(--panel-bg);
+    border: 1px solid var(--primary-color);
+    box-shadow: var(--border-glow);
+    padding: 20px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.stat-box h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    color: var(--secondary-color);
+    letter-spacing: 2px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--secondary-color), var(--primary-color));
+    box-shadow: 0 0 10px var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.stat-value {
+    text-align: right;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+/* Arc Reactor */
+.center-stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.arc-reactor {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid transparent;
+}
+
+.outer-ring {
+    width: 100%;
+    height: 100%;
+    border-top: 2px solid var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    animation: spin 10s linear infinite;
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+}
+
+.middle-ring {
+    width: 80%;
+    height: 80%;
+    border-left: 2px solid var(--secondary-color);
+    border-right: 2px solid var(--secondary-color);
+    animation: spin-reverse 7s linear infinite;
+}
+
+.inner-ring {
+    width: 60%;
+    height: 60%;
+    border: 2px dashed rgba(0, 242, 254, 0.6);
+    animation: spin 15s linear infinite;
+}
+
+.core-glow {
+    width: 40%;
+    height: 40%;
+    background: radial-gradient(circle, #ffffff 0%, var(--primary-color) 40%, transparent 80%);
+    border-radius: 50%;
+    box-shadow: 0 0 50px var(--primary-color);
+    animation: pulse 2s ease-in-out infinite alternate;
+}
+
+.status-text {
+    margin-top: 40px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px var(--primary-color);
+}
+
+/* Chat Box */
+.chat-container {
+    background: var(--panel-bg);
+    border: 1px solid var(--primary-color);
+    box-shadow: var(--border-glow);
+    padding: 20px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    /* Lock to full height of parent, never grow beyond it */
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+    min-height: 0;
+    box-sizing: border-box;
+}
+
+.chat-container h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    color: var(--secondary-color);
+    letter-spacing: 2px;
+    border-bottom: 1px solid rgba(0, 242, 254, 0.3);
+    padding-bottom: 10px;
+    flex-shrink: 0;   /* header never collapses */
+}
+
+.chat-box {
+    flex: 1;
+    overflow-y: auto;   /* messages scroll inside — box never grows */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-right: 5px;
+    min-height: 0;      /* critical for flex overflow to work */
+}
+
+.chat-box::-webkit-scrollbar { width: 4px; }
+.chat-box::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 2px; }
+
+.message {
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 1rem;
+    max-width: 90%;
+}
+
+.message.system {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    align-self: center;
+    text-align: center;
+}
+
+.message.user {
+    background: rgba(0, 242, 254, 0.1);
+    border-right: 2px solid var(--primary-color);
+    align-self: flex-end;
+}
+
+.message.jarvis {
+    background: rgba(255, 0, 127, 0.1);
+    border-left: 2px solid #ff007f;
+    align-self: flex-start;
+}
+
+.input-area {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;   /* always stay at the bottom, never squeezed */
+}
+
+#cmd-input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 242, 254, 0.5);
+    color: var(--text-color);
+    padding: 10px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: box-shadow 0.3s;
+}
+
+#cmd-input:focus {
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+}
+
+#send-btn {
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0 20px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#send-btn:hover {
+    background: var(--primary-color);
+    color: #000;
+    box-shadow: 0 0 15px var(--primary-color);
+}
+
+#mic-btn {
+    background: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0 15px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#mic-btn:hover {
+    background: rgba(0, 242, 254, 0.2);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+}
+
+/* Animations */
+@keyframes spin { 100% { transform: rotate(360deg); } }
+@keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+@keyframes pulse { 0% { transform: scale(0.9); opacity: 0.8; } 100% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 80px var(--primary-color); } }
+
+/* Speaking state — arc reactor pulses pink when Jarvis talks */
+.arc-reactor.speaking .core-glow {
+    background: radial-gradient(circle, #ffffff 0%, #ff007f 40%, transparent 80%);
+    box-shadow: 0 0 80px #ff007f, 0 0 160px rgba(255, 0, 127, 0.4);
+    animation: speak-pulse 0.5s ease-in-out infinite alternate;
+}
+.arc-reactor.speaking .outer-ring {
+    border-top-color: #ff007f;
+    border-bottom-color: #ff007f;
+    box-shadow: 0 0 30px rgba(255, 0, 127, 0.6);
+    animation: spin 3s linear infinite;
+}
+@keyframes speak-pulse {
+    0%  { transform: scale(0.95); }
+    100% { transform: scale(1.3); box-shadow: 0 0 120px #ff007f, 0 0 200px rgba(255,0,127,0.5); }
+}
